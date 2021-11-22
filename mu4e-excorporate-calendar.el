@@ -38,16 +38,14 @@ server.  Use the icalendar UID as the key."
     (user-error "No calendar event (gnus-icalendar-event)"))
   ;; find ical data
   (message "--coan-mu4e-excp-meeting--")
-  ;; (message "%s" (pp-to-string gnus-icalendar-event))
-  ;;(message "%s" (gnus-icalendar-event->gnus-calendar gnus-icalendar-event))
   ;; Keep a local copy of gnus-icalendar-event for the closures/lambdas.
   (let ((ical (clone gnus-icalendar-event)))
     (cl-destructuring-bind
         (_sec _min _hour day month year &rest) (decode-time (gnus-icalendar-event:start-time ical))
       ;; do something like exco-org-show-day to find the outlook appointment
       (exco-connection-iterate
-       ;; intilize-function
-       #'ignore ; (lambda () (message "exco initialize"))
+       ;; intialize-function
+       #'ignore
        ;; exco-connection-iterate per-connection function
        (lambda (identifier callback)
          (exco-get-meetings-for-day identifier
@@ -55,7 +53,6 @@ server.  Use the icalendar UID as the key."
                                     callback))
        ;; exco-connection-iterate per-connection callback
        (lambda (identifier response)
-         ;; (message "%s" (pp-to-string response))
          (exco-calendar-item-with-details-iterate
           identifier response
           ;; exco-calendar-item-with-details-iterate callback
