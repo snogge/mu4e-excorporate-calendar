@@ -50,6 +50,8 @@ Call MEETING-CALLBACK when completed."
        #'ignore
        ;; exco-connection-iterate per-connection function
        (lambda (identifier callback)
+         ;; TODO: Better filtering is possible here, no need to
+         ;; iterate over all of the days meetings.
          (exco-get-meetings-for-day identifier
                                     month day year
                                     callback))
@@ -62,13 +64,16 @@ Call MEETING-CALLBACK when completed."
     			   _subject _start _end _location
     			   _main-invitees _optional-invitees
     			   icalendar-text)
+            ;; TODO: Check some things before requesting the ical text
+            ;; from the server Needs to be careful that the item on
+            ;; the server has not been updated.  Fail in this case?
             (let ((item-ical (with-temp-buffer
                                (insert icalendar-text)
                                (gnus-icalendar-event-from-buffer (current-buffer)))))
               (when (string= (gnus-icalendar-event:uid ical)
                              (gnus-icalendar-event:uid item-ical))
                 (message "Found %s" (gnus-icalendar-event:summary item-ical))
-
+                ;; TODO: Pass the meeting data to the meeting-callback
                 ))
             (funcall finalize))
           ;; exco-calendar-item-with-details-iterate finalize
