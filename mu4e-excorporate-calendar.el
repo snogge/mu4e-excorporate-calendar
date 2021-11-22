@@ -32,8 +32,13 @@
   "Accept the meeting in the *Article* buffer."
   (interactive)
   (with-current-buffer (get-buffer "*Article*")
-    (mu4e-excorporate-calendar-meeting gnus-icalendar-event
-                                       (lambda () (message "++++++ meeting done")))))
+    (mu4e-excorporate-calendar-meeting
+     (with-suppressed-warnings ((obsolete gnus-icalendar-event))
+       ;; gnus-icalendar-event is not actually obsolete, it's just the
+       ;; defclass macro that sets variables of the same name as the
+       ;; class as obsolete for reasons it seems no-one remembers.
+       gnus-icalendar-event)
+     (lambda () (message "++++++ meeting done")))))
 
 (defun mu4e-excorporate-calendar--make-ical-event (icalendar-text)
   "Create a `gnus-icalendar-event' class object from ICALENDAR-TEXT."
