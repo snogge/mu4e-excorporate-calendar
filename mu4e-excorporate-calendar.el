@@ -52,7 +52,7 @@ server.  Use the icalendar UID as the key."
                                     month day year
                                     callback))
        ;; exco-connection-iterate per-connection callback
-       (lambda (identifier response)
+       (lambda (identifier response connection-finalizer)
          (exco-calendar-item-with-details-iterate
           identifier response
           ;; exco-calendar-item-with-details-iterate callback
@@ -70,10 +70,13 @@ server.  Use the icalendar UID as the key."
                 ))
             (funcall finalize))
           ;; exco-calendar-item-with-details-iterate finalize
-          #'ignore))
+          connection-finalizer))
        ;; exco-connection-iterate finalize function
        #'ignore ; (lambda () (message "exco finalize")))
-       ))))
+       ;; callback-will-call-finalize must be non-nil as the
+       ;; per-connection callback does asynchronous calls, see the doc
+       ;; of exco-connection-iterate
+       t))))
 
 (provide 'mu4e-excorporate-calendar)
 ;;; mu4e-excorporate-calendar.el ends here
