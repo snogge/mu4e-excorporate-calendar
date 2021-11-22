@@ -35,6 +35,12 @@
     (mu4e-excorporate-calendar-meeting gnus-icalendar-event
                                        (lambda () (message "++++++ meeting done")))))
 
+(defun mu4e-excorporate-calendar--make-ical-event (icalendar-text)
+  "Create a `gnus-icalendar-event' class object from ICALENDAR-TEXT."
+  (with-temp-buffer
+    (insert icalendar-text)
+    (gnus-icalendar-event-from-buffer (current-buffer))))
+
 (defun mu4e-excorporate-calendar-meeting (ical-event meeting-callback)
   "Find the exchange server meeting matching ICAL-EVENT.
 Use the icalendar UID as the key.
@@ -67,9 +73,7 @@ Call MEETING-CALLBACK when completed."
             ;; TODO: Check some things before requesting the ical text
             ;; from the server Needs to be careful that the item on
             ;; the server has not been updated.  Fail in this case?
-            (let ((item-ical (with-temp-buffer
-                               (insert icalendar-text)
-                               (gnus-icalendar-event-from-buffer (current-buffer)))))
+            (let ((item-ical (mu4e-excorporate-calendar--make-ical-event icalendar-text)))
               (when (string= (gnus-icalendar-event:uid ical)
                              (gnus-icalendar-event:uid item-ical))
                 (message "Found %s" (gnus-icalendar-event:summary item-ical))
