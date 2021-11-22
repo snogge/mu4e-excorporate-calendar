@@ -28,18 +28,20 @@
 (require 'gnus-icalendar)
 (require 'excorporate)
 
-(defun mu4e-excorporate-calendar-meeting ()
-  "Find the meeting on the exchange server.
-Find meeting described in the attached icalendar file on the
-server.  Use the icalendar UID as the key."
+(defun mu4e-excorporate-calendar-accept-meeting ()
+  "Accept the meeting in the *Article* buffer."
   (interactive)
-  (cl-assert (derived-mode-p 'mu4e-view-mode))
-  (unless gnus-icalendar-event
-    (user-error "No calendar event (gnus-icalendar-event)"))
-  ;; find ical data
+  (with-current-buffer (get-buffer "*Article*")
+    (mu4e-excorporate-calendar-meeting gnus-icalendar-event
+                                       (lambda () (message "++++++ meeting done")))))
+
+(defun mu4e-excorporate-calendar-meeting (ical-event meeting-callback)
+  "Find the exchange server meeting matching ICAL-EVENT.
+Use the icalendar UID as the key.
+Call MEETING-CALLBACK when completed."
   (message "--coan-mu4e-excp-meeting--")
-  ;; Keep a local copy of gnus-icalendar-event for the closures/lambdas.
-  (let ((ical (clone gnus-icalendar-event)))
+  ;; Keep a local copy of the ical-event for the closures/lambdas.
+  (let ((ical (clone ical-event)))
     (cl-destructuring-bind
         (_sec _min _hour day month year &rest) (decode-time (gnus-icalendar-event:start-time ical))
       ;; do something like exco-org-show-day to find the outlook appointment
@@ -72,7 +74,8 @@ server.  Use the icalendar UID as the key."
           ;; exco-calendar-item-with-details-iterate finalize
           connection-finalizer))
        ;; exco-connection-iterate finalize function
-       #'ignore ; (lambda () (message "exco finalize")))
+       (lambda ()
+         (funcall meeting-callback))
        ;; callback-will-call-finalize must be non-nil as the
        ;; per-connection callback does asynchronous calls, see the doc
        ;; of exco-connection-iterate
