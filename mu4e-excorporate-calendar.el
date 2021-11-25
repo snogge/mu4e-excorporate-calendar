@@ -39,8 +39,18 @@
        ;; defclass macro that sets variables of the same name as the
        ;; class as obsolete for reasons it seems no-one remembers.
        gnus-icalendar-event)
-     (lambda (_identifier item-identifier)
-       (message "Do something with %s" (pp-to-string item-identifier))))))
+     (lambda (identifier item-identifier)
+       (exco-calendar-item-meeting-reply
+        identifier item-identifier nil 'accept
+        (lambda (_identifier response)
+          ;; more or less a copy of exco-org--handle-reponse
+          (let ((response-code (exco-extract-value '(ResponseMessages
+					                                 CreateItemResponseMessage
+					                                 ResponseCode)
+					                               response)))
+            (if (equal response-code "NoError")
+                (progn (message "Successfully accepted"))
+              (message "Failed to accept")))))))))
 
 (defun mu4e-excorporate-calendar--item-iterate (identifier response callback finalize)
   "Iterate through calendar items in RESPONSE, calling CALLBACK on each.
