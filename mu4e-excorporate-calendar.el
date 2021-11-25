@@ -87,6 +87,7 @@ when completed."
   (message "--coan-mu4e-excp-meeting--")
   ;; Keep a local copy of the ical-event for the closures/lambdas.
   (let ((ical (clone ical-event))
+        connection-identifier
         meeting-item-identifier)
     (cl-destructuring-bind
         (_sec _min _hour day month year &rest) (decode-time (gnus-icalendar-event:start-time ical))
@@ -117,13 +118,14 @@ when completed."
                               (gnus-icalendar-event:uid item-ical))
                  (message "Found %s" (gnus-icalendar-event:summary item-ical))
                  ;; TODO: Pass the meeting data to the meeting-callback
-                 (setq meeting-item-identifier item-identifier)
+                 (setq connection-identifier identifier
+                       meeting-item-identifier item-identifier)
                  ))
              (funcall finalize))
            connection-finalizer))
        ;; exco-connection-iterate finalize function
        (lambda ()
-         (funcall meeting-callback identifier meeting-item-identifier))
+         (funcall meeting-callback connection-identifier meeting-item-identifier))
        ;; callback-will-call-finalize must be non-nil as the
        ;; per-connection callback does asynchronous calls, see the doc
        ;; of exco-connection-iterate
